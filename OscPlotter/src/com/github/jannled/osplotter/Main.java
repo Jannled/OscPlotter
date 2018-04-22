@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Arrays;
 
 import com.github.jannled.lib.FileUtils;
+import com.github.jannled.lib.LogListener;
 import com.github.jannled.lib.Print;
 
 import javafx.application.Application;
@@ -13,11 +14,12 @@ import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.scene.control.*;
 
-public class Main extends Application
+public class Main extends Application implements LogListener
 {
 	private final int channelCount = 4;
 	
@@ -27,16 +29,22 @@ public class Main extends Application
 	HBox pnlControls = new HBox();
 	BorderPane pnlPlotter = new BorderPane();
 	
+	static String[] args;
+	
 	Spinner<Integer> spnStart = new Spinner<Integer>(0, 0, 0);
 	Spinner<Integer> spnLength = new Spinner<Integer>(0, 0, 0);
 	
 	CheckBox[] chkChannels;
 	
+	TextArea txtLog = new TextArea(">> OscPlotter <<");
+	
 	public static void main(String[] args)
 	{
 		Print.m("Oscilloscpe Plotter launched with arguments " + Arrays.toString(args));
+		Main.args = args;
 		Print.setOutputLevel(Print.ALL);
 		launch(args);
+		Print.m("Exiting OscPlotter");
 	}
 
 	@Override
@@ -72,6 +80,16 @@ public class Main extends Application
 		});
 		pnlControls.getChildren().add(btnOpen);
 		
+		//Log
+		Print.registerListener(this);
+		txtLog.setEditable(false);
+		for(String s : Print.getLog())
+			txtLog.setText(txtLog.getText() + '\n' + s);
+		ScrollPane sp = new ScrollPane();
+		sp.setContent(txtLog);
+		pnlPlotter.setBottom(sp);
+		
+		
 		//Probes
 		chkChannels = new CheckBox[channelCount];
 		for(int i=0; i<channelCount; i++)
@@ -96,6 +114,9 @@ public class Main extends Application
 		//Show stage
 		primaryStage.setScene(scene);
 		primaryStage.show();
+		
+		//Check if a file is in the parameters
+		
 	}
 	
 	public Spinner<Integer> getSpnStart()
@@ -111,5 +132,13 @@ public class Main extends Application
 	public CheckBox[] getSelectedChannels()
 	{
 		return chkChannels;
+	}
+
+	@Override
+	public void notifyLog(String message, int level)
+	{
+		if(level == Print.ALL && Print.getOutputLevel() != Print.ALL)
+			return;
+		txtLog.setText(txtLog.getText() + '\n' + message);
 	}
 }
