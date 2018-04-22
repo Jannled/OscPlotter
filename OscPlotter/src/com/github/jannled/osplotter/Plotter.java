@@ -5,11 +5,14 @@ import com.github.jannled.lib.Print;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import javafx.collections.*;
-import javafx.beans.value.*;
+import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 
 public class Plotter extends Canvas
 {
+	Main main;
+	
+	public static final Color[] channelColors = new Color[] {Color.DEEPSKYBLUE, Color.YELLOW, Color.MEDIUMPURPLE, Color.CORAL, Color.FIREBRICK, Color.LIGHTGREEN};
+	
 	public double[][] channels;
 	public int channelCount;
 	
@@ -19,14 +22,16 @@ public class Plotter extends Canvas
 	private final static int WIDTH = 1280;
 	private final static int HEIGHT = 720;
 	
-	public Plotter(int channelCount)
+	public Plotter(Main main, int channelCount)
 	{
 		super(WIDTH, HEIGHT);
 		this.channelCount = channelCount;
-		plot(0, 100);
+		this.main = main;
 		
 		widthProperty().addListener(evt -> plot(start, length));
 		heightProperty().addListener(evt -> plot(start, length));
+		
+		plot(0, 100);
 	}
 	
 	public void parse(String file)
@@ -35,7 +40,7 @@ public class Plotter extends Canvas
 	
 		String[] samples = file.split("\n");
 		channels = new double[channelCount][samples.length-1];
-				
+		
 		for(int i=1; i<samples.length; i++)
 		{
 			String[] sample = samples[i].trim().split(",");
@@ -57,6 +62,13 @@ public class Plotter extends Canvas
 		if(errorFlag==0) Print.m("Parsed file without errors.");
 		else Print.e(errorFlag + " errors occured while parsing file.");
 		
+		IntegerSpinnerValueFactory vstart = (IntegerSpinnerValueFactory) main.getSpnStart().getValueFactory();
+		IntegerSpinnerValueFactory vlength = (IntegerSpinnerValueFactory) main.getSpnLength().getValueFactory();
+		
+		vstart.setMax(channels[0].length-1);
+		vlength.setMax(channels[0].length);
+		vlength.setValue(length);
+		
 		plot(0, 100);
 	}
 	
@@ -67,6 +79,7 @@ public class Plotter extends Canvas
 		
 		//Background color
 		GraphicsContext gc = getGraphicsContext2D();
+		gc.clearRect(0, 0, getWidth(), getHeight());
 		gc.setFill(new Color(0.03, 0.03, 0.03, 1));
 		gc.fillRect(0, 0, getWidth(), getHeight());
 		
@@ -75,9 +88,41 @@ public class Plotter extends Canvas
 			gc.setStroke(Color.DEEPSKYBLUE);
 			gc.setFill(Color.DEEPSKYBLUE);
 			gc.fillText("Please select a file!", 100, 100);
+			
+			return;
 		}
 		
-		Print.d("Draw!");
+		//Prevent ArrayIndexOutOfBoundsException
+		if(start+length > channels[0].length)
+		{
+			Print.e("Entered range exceeds the amount of measuered oscilloscope samples!");
+			return;
+		}
+		
+		final double segmentLength = getWidth()/length;
+		
+		for(int c=0; c<channelCount; c++)
+		{
+			if(!main.getSelectedChannels()[c].isSelected())
+				continue;
+			
+			gc.setStroke(channelColors[c]);
+			gc.setFill(channelColors[c]);
+			gc.beginPath();
+			for(int i=start; i<length+start; i++)
+			{
+				gc.lineTo((i-start) * segmentLength, channels[c][i] + getHeight()/2);
+			}
+			gc.moveTo(0, getHeight()/2);
+			gc.stroke();
+			gc.closePath();
+		}
+		Print.d("Repaint");
+	}
+	
+	public void plot()
+	{
+		plot(start, length);
 	}
 	
 	@Override
@@ -85,7 +130,7 @@ public class Plotter extends Canvas
 	{
 		super.setWidth(width);
 		super.setHeight(height);
-		plot(start, length);
+		//plot(start, length);
 	}
 	
 	@Override
@@ -104,5 +149,15 @@ public class Plotter extends Canvas
 	public boolean isResizable()
 	{
 		return true;
+	}
+	
+	public int getStart()
+	{
+		return start;
+	}
+	
+	public int getLength()
+	{
+		return length;
 	}
 }
