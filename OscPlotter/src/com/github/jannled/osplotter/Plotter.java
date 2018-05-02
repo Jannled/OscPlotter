@@ -2,16 +2,18 @@ package com.github.jannled.osplotter;
 
 import com.github.jannled.lib.Print;
 
+import javafx.event.EventHandler;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
+import javafx.scene.input.MouseEvent;
 
-public class Plotter extends Canvas
+public class Plotter extends Canvas implements EventHandler<MouseEvent>
 {
 	Main main;
 	
-	public static final Color[] channelColors = new Color[] {Color.DEEPSKYBLUE, Color.YELLOW, Color.MEDIUMPURPLE, Color.CORAL, Color.FIREBRICK, Color.LIGHTGREEN};
+	public static final Color[] channelColors = new Color[] {Color.YELLOW, Color.MEDIUMPURPLE, Color.CORAL, Color.FIREBRICK, Color.LIGHTGREEN};
 	
 	public double[][] channels;
 	public int channelCount;
@@ -30,6 +32,8 @@ public class Plotter extends Canvas
 		
 		widthProperty().addListener(evt -> plot(start, length));
 		heightProperty().addListener(evt -> plot(start, length));
+		
+		setOnMouseMoved(this);
 		
 		plot(0, 100);
 	}
@@ -72,7 +76,7 @@ public class Plotter extends Canvas
 		plot(0, 100);
 	}
 	
-	public void plot(int start, int length)
+	public void plot(int start, int length, double cursorX, double cursorY)
 	{
 		this.start = start;
 		this.length = length;
@@ -117,12 +121,24 @@ public class Plotter extends Canvas
 			gc.stroke();
 			gc.closePath();
 		}
+		
+		//Draw Cursor
+		if(cursorX > 0 && cursorY > 0)
+		{
+			gc.setStroke(Color.DEEPSKYBLUE);
+			gc.strokeLine(cursorX, 0, cursorX, getHeight());
+		}
 		Print.d("Repaint");
 	}
 	
 	public void plot()
 	{
 		plot(start, length);
+	}
+	
+	public void plot(int start, int width)
+	{
+		plot(start, width, -1, -1);
 	}
 	
 	@Override
@@ -159,5 +175,11 @@ public class Plotter extends Canvas
 	public int getLength()
 	{
 		return length;
+	}
+
+	@Override
+	public void handle(MouseEvent e)
+	{
+		plot(start, length, e.getX(), e.getY());
 	}
 }
