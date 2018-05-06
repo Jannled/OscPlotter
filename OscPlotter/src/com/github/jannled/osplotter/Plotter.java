@@ -2,16 +2,21 @@ package com.github.jannled.osplotter;
 
 import com.github.jannled.lib.Print;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import javafx.scene.control.ScrollBar;
 import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
 
-public class Plotter extends Canvas implements EventHandler<MouseEvent>
+public class Plotter extends BorderPane implements EventHandler<MouseEvent>
 {
 	Main main;
+	PlottCanvas canvas;
 	
 	public static final Color[] channelColors = new Color[] {Color.YELLOW, Color.MEDIUMPURPLE, Color.CORAL, Color.FIREBRICK, Color.LIGHTGREEN};
 	
@@ -21,12 +26,14 @@ public class Plotter extends Canvas implements EventHandler<MouseEvent>
 	int start = 0;
 	int length = 100;
 	
-	private final static int WIDTH = 1280;
-	private final static int HEIGHT = 720;
+	final static int WIDTH = 1280;
+	final static int HEIGHT = 720;
+	
+	ScrollBar scrollBra;
 	
 	public Plotter(Main main, int channelCount)
 	{
-		super(WIDTH, HEIGHT);
+		canvas = new PlottCanvas(WIDTH, HEIGHT);
 		this.channelCount = channelCount;
 		this.main = main;
 		
@@ -34,7 +41,22 @@ public class Plotter extends Canvas implements EventHandler<MouseEvent>
 		heightProperty().addListener(evt -> plot(start, length));
 		
 		setOnMouseMoved(this);
+		setCenter(canvas);
 		
+		 scrollBra = new ScrollBar();
+		 scrollBra.setMin(0);
+		 scrollBra.setMax(0);
+		 scrollBra.valueProperty().addListener(new ChangeListener<Number>() {
+
+			@Override
+			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue)
+			{
+				plot(newValue.intValue(), length);
+			}
+		});
+		 setBottom(scrollBra);
+		
+		setMinSize(WIDTH, HEIGHT);
 		plot(0, 100);
 	}
 	
@@ -73,6 +95,7 @@ public class Plotter extends Canvas implements EventHandler<MouseEvent>
 		vlength.setMax(channels[0].length);
 		vlength.setValue(length);
 		
+		scrollBra.setMax(length);
 		plot(0, 100);
 	}
 	
@@ -82,7 +105,7 @@ public class Plotter extends Canvas implements EventHandler<MouseEvent>
 		this.length = length;
 		
 		//Background color
-		GraphicsContext gc = getGraphicsContext2D();
+		GraphicsContext gc = canvas.getGraphicsContext2D();
 		gc.clearRect(0, 0, getWidth(), getHeight());
 		gc.setFill(new Color(0.03, 0.03, 0.03, 1));
 		gc.fillRect(0, 0, getWidth(), getHeight());
@@ -128,7 +151,6 @@ public class Plotter extends Canvas implements EventHandler<MouseEvent>
 			gc.setStroke(Color.DEEPSKYBLUE);
 			gc.strokeLine(cursorX, 0, cursorX, getHeight());
 		}
-		Print.d("Repaint");
 	}
 	
 	public void plot()
@@ -139,32 +161,6 @@ public class Plotter extends Canvas implements EventHandler<MouseEvent>
 	public void plot(int start, int width)
 	{
 		plot(start, width, -1, -1);
-	}
-	
-	@Override
-	public void resize(double width, double height)
-	{
-		super.setWidth(width);
-		super.setHeight(height);
-		//plot(start, length);
-	}
-	
-	@Override
-	public double minWidth(double height)
-	{
-		return HEIGHT;
-	}
-	
-	@Override
-	public double minHeight(double width)
-	{
-		return HEIGHT;
-	}
-	
-	@Override
-	public boolean isResizable()
-	{
-		return true;
 	}
 	
 	public int getStart()
@@ -181,5 +177,39 @@ public class Plotter extends Canvas implements EventHandler<MouseEvent>
 	public void handle(MouseEvent e)
 	{
 		plot(start, length, e.getX(), e.getY());
+	}
+}
+
+class PlottCanvas extends Canvas
+{
+	public PlottCanvas(int width, int height)
+	{
+		super(width, height);
+	}
+	
+	@Override
+	public void resize(double width, double height)
+	{
+		super.setWidth(width);
+		super.setHeight(height);
+		//plot(start, length);
+	}
+	
+	@Override
+	public double minWidth(double height)
+	{
+		return Plotter.WIDTH;
+	}
+	
+	@Override
+	public double minHeight(double width)
+	{
+		return Plotter.HEIGHT;
+	}
+	
+	@Override
+	public boolean isResizable()
+	{
+		return true;
 	}
 }

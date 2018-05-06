@@ -10,10 +10,7 @@ import com.github.jannled.lib.Print;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -22,7 +19,6 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -30,13 +26,9 @@ public class Main extends Application implements LogListener
 {
 	private final int channelCount = 4;
 	
-	private boolean showLog = false;
-	
 	Plotter plotter = new Plotter(this, channelCount);
 	FileChooser fileChooser = new FileChooser();
 	
-	BorderPane pnlRoot = new BorderPane();
-	HBox pnlControls = new HBox();
 	BorderPane pnlPlotter = new BorderPane();
 	
 	static String[] args;
@@ -63,18 +55,12 @@ public class Main extends Application implements LogListener
 		//Setup
 		pnlPlotter.setCenter(plotter);
 		
-		//Control bar
-		pnlControls.setStyle("-fx-background-color: white");
-		pnlControls.setPadding(new Insets(10));
-		pnlControls.setSpacing(10);
-		pnlPlotter.setTop(pnlControls);
-		
-		Scene scene = new Scene(pnlRoot);
+		Scene scene = new Scene(pnlPlotter);
 		
 		//Menu bar
 		MenuBar menuBar = new MenuBar();
 		
-		Menu fileMenu = new Menu("File");
+		Menu menuFile = new Menu("File");
 		
 		//File Dialog
 		MenuItem openFileItem = new MenuItem("Open File");
@@ -95,6 +81,7 @@ public class Main extends Application implements LogListener
 		});
 		
 		//Log
+		CheckMenuItem showLog = new CheckMenuItem("Show log");
 		Print.registerListener(this);
 		txtLog.setEditable(false);
 		for(String s : Print.getLog())
@@ -103,15 +90,20 @@ public class Main extends Application implements LogListener
 		sp.setContent(txtLog);
 		sp.setFitToWidth(true);
 		
-		Button showLog = new Button("Show Log file");
 		showLog.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event)
 			{
-				pnlPlotter.setBottom(sp);
+				if(showLog.isSelected())
+				{
+					pnlPlotter.setBottom(sp);
+					sp.setMinViewportHeight(50);
+					sp.setMinHeight(100);
+				}
+				else
+					pnlPlotter.setBottom(null);
 			}
 		});
-		pnlPlotter.setBottom(showLog);
 		
 		//Probes
 		Menu menuProbes = new Menu("Probes");
@@ -122,7 +114,7 @@ public class Main extends Application implements LogListener
 			CheckMenuItem checkBox = new CheckMenuItem("Channel " + (i+1));
 			checkBox.setSelected(true);
 			checkBox.selectedProperty().addListener((obs, oldVal, newVal) -> plotter.plot());
-			pnlControls.getChildren().add(checkBox);
+			menuProbes.getItems().add(checkBox);
 			chkChannels[i] = checkBox;
 		}
 		
@@ -133,15 +125,13 @@ public class Main extends Application implements LogListener
 		spnLength.setEditable(true);
 		spnStart.setEditable(true);
 		
-		pnlControls.getChildren().add(spnStart);
-		pnlControls.getChildren().add(spnLength);
-		
-		pnlRoot.setCenter(pnlPlotter);
+		//pnlControls.getChildren().add(spnStart);
+		//pnlControls.getChildren().add(spnLength);
 		
 		//Build Menu
-		fileMenu.getItems().addAll(openFileItem);
-		menuBar.getMenus().addAll(fileMenu);
-		pnlRoot.setTop(menuBar);
+		menuFile.getItems().addAll(openFileItem, showLog);
+		menuBar.getMenus().addAll(menuFile, menuProbes);
+		pnlPlotter.setTop(menuBar);
 		
 		//Show stage
 		primaryStage.setScene(scene);
@@ -161,7 +151,7 @@ public class Main extends Application implements LogListener
 		return spnLength;
 	}
 	
-	public CheckBox[] getSelectedChannels()
+	public CheckMenuItem[] getSelectedChannels()
 	{
 		return chkChannels;
 	}
