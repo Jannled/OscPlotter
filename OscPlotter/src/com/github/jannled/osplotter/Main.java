@@ -53,6 +53,7 @@ public class Main extends Application implements LogListener
 	public void start(Stage primaryStage) throws Exception
 	{
 		//Setup
+		primaryStage.setTitle("Osc Plotter");
 		pnlPlotter.setCenter(plotter);
 		
 		Scene scene = new Scene(pnlPlotter);
