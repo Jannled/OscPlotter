@@ -18,7 +18,7 @@
 		<link>
 			<name>jfxrt.jar</name>
 			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/Program%20Files%20(x86)/Java/jre1.8.0_201/lib/ext/jfxrt.jar</locationURI>
+			<location>C:/Program Files/Java/jre1.8.0_201/lib/ext/jfxrt.jar</location>
 		</link>
 	</linkedResources>
 </projectDescription>
