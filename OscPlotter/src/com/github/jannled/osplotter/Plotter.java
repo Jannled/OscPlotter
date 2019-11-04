@@ -54,7 +54,7 @@ public class Plotter extends BorderPane implements EventHandler<MouseEvent>
 				plot(newValue.intValue(), length);
 			}
 		});
-		 setBottom(scrollBra);
+		setBottom(scrollBra);
 		
 		setMinSize(WIDTH, HEIGHT);
 		plot(0, 100);
