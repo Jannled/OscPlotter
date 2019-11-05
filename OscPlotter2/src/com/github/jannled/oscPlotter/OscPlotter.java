@@ -20,6 +20,7 @@ public class OscPlotter extends BorderPane
 	private PlotPane plotPane;
 	private MenuBar menuBar;
 	private HBox probeMenu;
+	private CSVMenu csvMenu;
 	
 	public OscPlotter()
 	{
@@ -46,7 +47,10 @@ public class OscPlotter extends BorderPane
 		miOpen.setOnAction((e) -> {
 			File file = Main.fileChooser.showOpenDialog(null);
 			if(file != null)
-				addProbe(new Probe(file, 4, 1, 10));
+			{
+				String[] fileContent = CSVLoader.loadString(file);
+				csvMenu.show(fileContent, this);
+			}
 		});
 		
 		//Menu Item Clear Probes
@@ -87,6 +91,9 @@ public class OscPlotter extends BorderPane
 		
 		vbox.getChildren().addAll(csB, csG);
 		probeMenu.getChildren().add(pTitled);
+		
+		//CSV-Menu
+		csvMenu = new CSVMenu();
 	}
 	
 	public void addProbe(Probe probe)
