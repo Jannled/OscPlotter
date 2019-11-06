@@ -11,7 +11,7 @@ public class Probe
 	
 	private static int probeIDC = 1;
 	private int probeID;
-	private Color[] colors = {Color.FIREBRICK, Color.AQUA, Color.GREEN, Color.BLUEVIOLET};
+	private Color[] colors = {Color.YELLOW, Color.CYAN, Color.PINK, Color.GREEN, Color.FIREBRICK, Color.BLUEVIOLET};
 	private Color color;
 	
 	public Probe(File path, int column)
@@ -36,7 +36,18 @@ public class Probe
 		this.yzoom = yzoom;
 		
 		probeID = probeIDC++;
-		color = colors[probeID%colors.length];
+		color = colors[(probeID-1)%colors.length];
+		
+		double ymin = 0;
+		double ymax = 0;
+		for(int i=0; i<values.length; i++)
+		{
+			if(values[i] < ymin)
+				ymin = values[i];
+			if(values[i] > ymax)
+				ymax = values[i];
+		}
+		System.out.println("Min: " + ymin + ", Max: " + ymax);
 	}
 	
 	public double[] getValues()

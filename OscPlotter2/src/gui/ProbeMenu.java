@@ -1,4 +1,6 @@
-package com.github.jannled.oscPlotter;
+package gui;
+
+import com.github.jannled.oscPlotter.Probe;
 
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Spinner;

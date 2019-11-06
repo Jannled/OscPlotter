@@ -1,8 +1,12 @@
-package com.github.jannled.oscPlotter;
+package gui;
 
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
+
+import com.github.jannled.oscPlotter.CSVLoader;
+import com.github.jannled.oscPlotter.Main;
+import com.github.jannled.oscPlotter.Probe;
 
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Menu;
@@ -21,6 +25,9 @@ public class OscPlotter extends BorderPane
 	private MenuBar menuBar;
 	private HBox probeMenu;
 	private CSVMenu csvMenu;
+	private ColorPicker csB;
+	private ColorPicker csG;
+	private TitledPane pTitled;
 	
 	public OscPlotter()
 	{
@@ -69,27 +76,27 @@ public class OscPlotter extends BorderPane
 		probeMenu = new HBox(10);
 		this.setBottom(probeMenu);
 		
-		//Background color
-		VBox vbox = new VBox(10);
+		//Bottom Menu
+		VBox bottomMenu = new VBox(10);
 		
 		//Color Picker Background
-		ColorPicker csB = new ColorPicker(plotPane.backgroundColor);
+		csB = new ColorPicker(plotPane.backgroundColor);
 		csB.setOnAction(e -> {
 			plotPane.backgroundColor = csB.getValue();
 			plotPane.plot(probes);
 		});
 		
 		//Color Picker Grid
-		ColorPicker csG = new ColorPicker(plotPane.gridColor);
+		csG = new ColorPicker(plotPane.gridColor);
 		csG.setOnAction(e -> {
 			plotPane.gridColor = csG.getValue();
 			plotPane.plot(probes);
 		});
 		
-		TitledPane pTitled = new TitledPane("Background", vbox);
+		pTitled = new TitledPane("Background", bottomMenu);
 		pTitled.setExpanded(false);
 		
-		vbox.getChildren().addAll(csB, csG);
+		bottomMenu.getChildren().addAll(csB, csG);
 		probeMenu.getChildren().add(pTitled);
 		
 		//CSV-Menu
@@ -102,6 +109,7 @@ public class OscPlotter extends BorderPane
 		plotPane.plot(probes);
 		
 		ProbeMenu pm = new ProbeMenu("Probe " + probe.getID(), probe, this);
+		pm.expandedProperty().bindBidirectional(pTitled.expandedProperty());
 		
 		probeMenu.getChildren().add(pm);
 	}
@@ -113,9 +121,10 @@ public class OscPlotter extends BorderPane
 	
 	public void clearProbes()
 	{
-		for(int i=0; i<probes.size(); i++)
-			probes.remove(i);
-		plotPane.plot(probes);
+		System.out.println("Remove all Probes!");
+		probes.clear();
+		probeMenu.getChildren().clear();
+		probeMenu.getChildren().add(pTitled);
 	}
 	
 	public List<Probe> getProbes()

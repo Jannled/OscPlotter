@@ -1,4 +1,5 @@
 package com.github.jannled.oscPlotter;
+import gui.OscPlotter;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.MenuBar;
@@ -7,7 +8,7 @@ import javafx.stage.Stage;
 
 public class Main extends Application 
 {	
-	static FileChooser fileChooser = new FileChooser();
+	public static FileChooser fileChooser = new FileChooser();
 	
 	public MenuBar menuBar;
 	

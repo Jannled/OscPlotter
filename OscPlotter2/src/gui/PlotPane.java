@@ -1,6 +1,8 @@
-package com.github.jannled.oscPlotter;
+package gui;
 
 import java.util.List;
+
+import com.github.jannled.oscPlotter.Probe;
 
 import javafx.event.EventHandler;
 import javafx.scene.canvas.Canvas;
@@ -51,6 +53,7 @@ public class PlotPane extends Canvas implements EventHandler<MouseEvent>
 				} 
 				
 				double onScreenY = average*probe.getYZoom() + getHeight()/2;
+				
 				
 				gc.lineTo(i, onScreenY);
 			}
