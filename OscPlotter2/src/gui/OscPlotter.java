@@ -13,6 +13,9 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TitledPane;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -65,11 +68,22 @@ public class OscPlotter extends BorderPane
 		miClear.setOnAction(e -> clearProbes());
 		
 		//Menu File
-		Menu mFile = new Menu("File");
+		Menu mFile = new Menu("_File");
 		mFile.getItems().addAll(miOpen, miClear);
 		
+		//Menu Item Screenshot
+		MenuItem miScreenshot = new MenuItem("Take Screenshot");
+		miScreenshot.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN));
+		miScreenshot.setOnAction(e -> {
+			FileOutput.writeImage(plotPane.snapshot(null, null));
+		});
+				
+		//Menu Screenshot
+		Menu mScreenshot = new Menu("_Screenshot");
+		mScreenshot.getItems().add(miScreenshot);
+		
 		//Menu Bar
-		menuBar = new MenuBar(mFile);
+		menuBar = new MenuBar(mFile, mScreenshot);
 		this.setTop(menuBar);
 		
 		//Probe Menus

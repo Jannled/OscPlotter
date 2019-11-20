@@ -25,6 +25,11 @@ public class PlotPane extends Canvas implements EventHandler<MouseEvent>
 		super(width, height);
 	}
 	
+	public void plot(List<Probe> probes, float cursorX)
+	{
+		plot(probes);
+	}
+	
 	public void plot(List<Probe> probes)
 	{
 		GraphicsContext gc = getGraphicsContext2D();
